@@ -1,0 +1,84 @@
+class ColaPrioridadPacientes {
+    private Paciente[] heap;
+    private int tamano;
+    private int capacidad=100;
+    
+
+    
+    public ColaPrioridadPacientes(int capacidadInicial) {
+        this.capacidad = capacidadInicial;
+        this.heap = new Paciente[capacidadInicial + 1];
+        this.tamano = 0;
+    }
+
+   private void asegurarCapacidad() {
+    if (tamano + 1 >= heap.length) {
+        int nuevaCapacidad = heap.length * 2; 
+        Paciente[] nuevoHeap = new Paciente[nuevaCapacidad];
+        System.arraycopy(heap, 0, nuevoHeap, 0, heap.length);
+        heap = nuevoHeap;
+        capacidad = nuevaCapacidad - 1; 
+        System.out.println("🔁 Aumentando tamaño del heap a: " + capacidad);
+    }
+}
+    public void insertar(Paciente p) {
+        asegurarCapacidad();
+        tamano++;
+        heap[tamano] = p;
+        int i = tamano;
+        while (i > 1 && heap[i].compareTo(heap[i/2]) < 0) {
+            swap(i, i/2);
+            i = i/2;
+        }
+    }
+
+    public Paciente extraerMin(){
+        if (tamano == 0){
+            return null;
+        } 
+        Paciente min = heap[1];
+        heap[1] = heap[tamano];
+        heap[tamano] = null;
+        tamano--;
+        heapify(1);
+        return min;
+    }
+
+    public Paciente obtenerMin(){
+        if(tamano==0){
+            return null;
+        }
+        else{
+            return heap[1];
+        }
+    }
+
+    public boolean estaVacia(){ 
+        return tamano == 0; 
+    }
+
+    private void heapify(int i) {
+        int l = 2*i, r = 2*i+1, menor = i;
+
+        if (l <= tamano && heap[l].compareTo(heap[menor]) < 0){
+            menor = l;
+        } 
+        if (r <= tamano && heap[r].compareTo(heap[menor]) < 0){
+            menor = r;
+        } 
+        if (menor != i) {
+            swap(i, menor);
+            heapify(menor);
+        }
+    }
+
+    private void swap(int a, int b) {
+        Paciente tmp = heap[a]; 
+        heap[a] = heap[b]; 
+        heap[b] = tmp;
+    }
+
+    public int size(){ 
+        return tamano; 
+        }
+}

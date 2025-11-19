@@ -1,0 +1,69 @@
+class ArbolPacientes {
+    private Nodo raiz;
+
+    private static class Nodo {
+        String key;
+        Paciente value;
+        Nodo izq, der;
+        Nodo(String k, Paciente v) {
+            key = k;
+            value = v;
+        }
+    }
+
+    public void insertar(Paciente p) {
+        String k = p.getId();
+        if (raiz == null) {
+            raiz = new Nodo(k, p);
+            return;
+        }
+
+        Nodo cur = raiz;
+        Nodo parent = null;
+        int cmp = 0;
+
+        while (cur != null) {
+            parent = cur;
+            cmp = k.compareTo(cur.key);
+            if (cmp < 0) {
+                cur = cur.izq;
+            } else if (cmp > 0) {
+                cur = cur.der;
+            } else { 
+                cur.value = p;
+                return;
+            }
+        }
+
+        Nodo nuevo = new Nodo(k, p);
+        if (cmp < 0) parent.izq = nuevo;
+        else parent.der = nuevo;
+    }
+
+
+    public Paciente buscar(String id) {
+        Nodo cur = raiz;
+        while (cur != null) {
+            int cmp = id.compareTo(cur.key);
+            if (cmp == 0) return cur.value;
+            cur = (cmp < 0) ? cur.izq : cur.der;
+        }
+        return null;
+    }
+
+    public List<Paciente> obtenerPacientesEnOrden() {
+        List<Paciente> res = new ArrayList<>();
+        Deque<Nodo> stack = new ArrayDeque<>();
+        Nodo cur = raiz;
+        while (cur != null || !stack.isEmpty()) {
+            while (cur != null) {
+                stack.push(cur);
+                cur = cur.izq;
+            }
+            cur = stack.pop();
+            res.add(cur.value);
+            cur = cur.der;
+        }
+        return res;
+    }
+}

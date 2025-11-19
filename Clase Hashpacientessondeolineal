@@ -1,1 +1,178 @@
+class HashPacientesSondeoLineal implements Map<String, Paciente> {
+
+    private static class Slot { 
+        String key; 
+        Paciente val; 
+        boolean deleted; 
+    }
+
+    private Slot[] table;
+    private int M;
+    private int size = 0;
+
+    public HashPacientesSondeoLineal(int M) {
+        this.M = M; 
+        table = new Slot[M];
+    }
+
+    private int hash(String key) {
+        long h = 0;
+        for (int i = 0; i < key.length(); i++) {
+            h = (h * 31 + key.charAt(i)) % M;
+        }
+        return (int) h;
+    }
+
+    @Override
+    public Paciente put(String key, Paciente value) {
+        int idx = hash(key);
+        int firstDeleted = -1;
+
+        for (int i = 0; i < M; i++) {
+            int p = (idx + i) % M;
+            Slot s = table[p];
+
+            if (s == null) {
+                int pos = (firstDeleted != -1) ? firstDeleted : p;
+                Slot ns = new Slot();
+                ns.key = key;
+                ns.val = value;
+                ns.deleted = false;
+                table[pos] = ns;
+                size++;
+                return null;
+            }
+
+            if (s.deleted && firstDeleted == -1) {
+                firstDeleted = p;
+            }
+
+            if (!s.deleted && s.key.equals(key)) {
+                Paciente old = s.val;
+                s.val = value;
+                return old;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Paciente get(Object keyObj) {
+        if (!(keyObj instanceof String)) { 
+            return null; 
+        }
+
+        String key = (String) keyObj;
+        int idx = hash(key);
+
+        for (int i = 0; i < M; i++) {
+            int p = (idx + i) % M;
+            Slot s = table[p];
+
+            if (s == null) { 
+                return null; 
+            }
+
+            if (!s.deleted && s.key.equals(key)) { 
+                return s.val; 
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Paciente remove(Object keyObj) {
+        if (!(keyObj instanceof String)) { 
+            return null; 
+        }
+
+        String key = (String) keyObj;
+        int idx = hash(key);
+
+        for (int i = 0; i < M; i++) {
+            int p = (idx + i) % M;
+            Slot s = table[p];
+
+            if (s == null) { 
+                return null; 
+            }
+
+            if (!s.deleted && s.key.equals(key)) {
+                s.deleted = true;
+                size--;
+                return s.val;
+            }
+        }
+
+        return null;
+    }
+
+    @Override 
+    public int size() { 
+        return size; 
+    }
+
+    @Override 
+    public boolean isEmpty() { 
+        return size == 0; 
+    }
+
+    @Override 
+    public boolean containsKey(Object key) { 
+        return get(key) != null; 
+    }
+
+    @Override 
+    public boolean containsValue(Object value) { 
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override 
+    public void putAll(Map<? extends String, ? extends Paciente> m) {
+        for (Entry<? extends String, ? extends Paciente> e : m.entrySet()) {
+            put(e.getKey(), e.getValue());
+        }
+    }
+
+    @Override 
+    public void clear() { 
+        table = new Slot[M]; 
+        size = 0; 
+    }
+
+    @Override 
+    public Set<String> keySet() { 
+        Set<String> s = new HashSet<>(); 
+        for (Slot slot : table) { 
+            if (slot != null && !slot.deleted) { 
+                s.add(slot.key); 
+            }
+        }
+        return s; 
+    }
+
+    @Override 
+    public Collection<Paciente> values() { 
+        List<Paciente> l = new ArrayList<>(); 
+        for (Slot slot : table) { 
+            if (slot != null && !slot.deleted) { 
+                l.add(slot.val); 
+            } 
+        }
+        return l; 
+    }
+
+    @Override 
+    public Set<Entry<String, Paciente>> entrySet() { 
+        Set<Entry<String, Paciente>> s = new HashSet<>(); 
+        for (Slot slot : table) { 
+            if (slot != null && !slot.deleted) { 
+                s.add(new AbstractMap.SimpleEntry<>(slot.key, slot.val)); 
+            }
+        }
+        return s; 
+    }
+}
 

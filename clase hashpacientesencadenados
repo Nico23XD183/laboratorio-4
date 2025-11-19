@@ -1,1 +1,146 @@
+class HashPacientesEncadenado implements Map<String, Paciente> { 
+    private LinkedList<Entry<String, Paciente>>[] table;
+    private int M;
+    private int size = 0;
+
+    @SuppressWarnings("unchecked")
+    public HashPacientesEncadenado(int M) {
+        this.M = M;
+        table = new LinkedList[M];
+        for (int i = 0; i < M; i++) {
+            table[i] = new LinkedList<>();
+        }
+    }
+
+    private int hash(String key) {
+        long h = 0;
+        for (int i = 0; i < key.length(); i++) {
+            h = (h * 31 + key.charAt(i)) % M;
+        }
+        return (int) h;
+    }
+
+    @Override
+    public Paciente put(String key, Paciente value) {
+        int idx = hash(key);
+
+        for (Entry<String, Paciente> e : table[idx]) {
+            if (e.getKey().equals(key)) {
+                Paciente old = e.getValue();
+                e.setValue(value);
+                return old;
+            }
+        }
+
+        table[idx].add(new AbstractMap.SimpleEntry<>(key, value));
+        size++;
+        return null;
+    }
+
+    @Override
+    public Paciente get(Object key) {
+        if (!(key instanceof String)) {
+            return null;
+        }
+
+        int idx = hash((String) key);
+
+        for (Entry<String, Paciente> e : table[idx]) {
+            if (e.getKey().equals(key)) {
+                return e.getValue();
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Paciente remove(Object key) {
+        if (!(key instanceof String)) {
+            return null;
+        }
+
+        int idx = hash((String) key);
+        Iterator<Entry<String, Paciente>> it = table[idx].iterator();
+
+        while (it.hasNext()) {
+            Entry<String, Paciente> e = it.next();
+            if (e.getKey().equals(key)) {
+                it.remove();
+                size--;
+                return e.getValue();
+            }
+        }
+
+        return null;
+    }
+
+    @Override 
+    public int size() { 
+        return size; 
+    }
+
+    @Override 
+    public boolean isEmpty() { 
+        return size == 0; 
+    }
+
+    @Override 
+    public boolean containsKey(Object key) { 
+        return get(key) != null; 
+    }
+
+    @Override 
+    public boolean containsValue(Object value) { 
+        throw new UnsupportedOperationException(); 
+    }
+
+    @Override 
+    public void putAll(Map<? extends String, ? extends Paciente> m) {
+        for (Entry<? extends String, ? extends Paciente> e : m.entrySet()) { 
+            put(e.getKey(), e.getValue()); 
+        }
+    }
+
+    @Override 
+    public void clear() { 
+        for (int i = 0; i < M; i++) { 
+            table[i].clear(); 
+        }
+        size = 0; 
+    }
+
+    @Override 
+    public Set<String> keySet() { 
+        Set<String> s = new HashSet<>(); 
+        for (int i = 0; i < M; i++) { 
+            for (Entry<String, Paciente> e : table[i]) { 
+                s.add(e.getKey()); 
+            } 
+        }
+        return s; 
+    }
+
+    @Override 
+    public Collection<Paciente> values() { 
+        List<Paciente> l = new ArrayList<>(); 
+        for (int i = 0; i < M; i++) { 
+            for (Entry<String, Paciente> e : table[i]) { 
+                l.add(e.getValue()); 
+            } 
+        }
+        return l; 
+    }
+
+    @Override 
+    public Set<Entry<String, Paciente>> entrySet() { 
+        Set<Entry<String, Paciente>> s = new HashSet<>(); 
+        for (int i = 0; i < M; i++) { 
+            for (Entry<String, Paciente> e : table[i]) { 
+                s.add(new AbstractMap.SimpleEntry<>(e)); 
+            } 
+        }
+        return s; 
+    }
+}
 
